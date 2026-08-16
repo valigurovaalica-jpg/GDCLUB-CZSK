@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Geometry Dash Club CZ/SK</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&display=swap');
+:root{--cyan:#00eaff;--blue:#247cff;--pink:#ff3158;--green:#45ff91;--bg:#050712;--card:rgba(10,16,31,.92)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;color:#fff;font-family:Orbitron,Arial,sans-serif;background:#050712;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;z-index:-5;background:
+linear-gradient(135deg,rgba(0,234,255,.07) 25%,transparent 25%) 0 0/80px 80px,
+linear-gradient(315deg,rgba(36,124,255,.05) 25%,transparent 25%) 0 0/80px 80px,
+radial-gradient(circle at 50% 10%,#12336b 0,transparent 35%),#050712}
+body:after{content:"";position:fixed;inset:0;z-index:-4;pointer-events:none;background:linear-gradient(transparent 96%,rgba(0,234,255,.06) 100%);background-size:100% 7px;opacity:.35}
+.gridbg{position:fixed;inset:0;z-index:-3;pointer-events:none;background:linear-gradient(rgba(0,234,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,234,255,.07) 1px,transparent 1px);background-size:55px 55px;transform:perspective(500px) rotateX(55deg) scale(1.7) translateY(120px);transform-origin:bottom}
+header{position:fixed;top:0;left:0;right:0;height:72px;background:rgba(3,6,15,.82);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,234,255,.25);display:flex;align-items:center;justify-content:space-between;padding:0 6%;z-index:20}
+.logo{font-size:19px;font-weight:900;color:var(--cyan);text-shadow:0 0 15px var(--cyan)}.logo b{color:var(--pink)}
+nav{display:flex;gap:20px;align-items:center}nav a{color:#aab4c8;text-decoration:none;font-size:11px}nav a:hover{color:var(--cyan)}
+button,.btn{border:0;border-radius:8px;padding:12px 18px;font-family:inherit;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block}
+.primary{background:var(--cyan);color:#031018;box-shadow:0 0 22px rgba(0,234,255,.35)}.danger{background:var(--pink);color:white}.dark{background:#151d31;color:#fff;border:1px solid #2b3855}.green{background:var(--green);color:#00150a}
+main{padding-top:72px}.hero{min-height:80vh;display:grid;place-items:center;text-align:center;padding:80px 20px}.hero .box{max-width:900px}
+.badge{display:inline-block;border:1px solid var(--cyan);color:var(--cyan);border-radius:30px;padding:9px 16px;font-size:10px;letter-spacing:2px;box-shadow:0 0 25px rgba(0,234,255,.18)}
+h1{font-size:clamp(45px,8vw,95px);line-height:.9;margin:25px 0;text-shadow:0 0 20px rgba(0,234,255,.35)}h1 span{color:var(--pink);text-shadow:0 0 18px rgba(255,49,88,.5)}
+.hero p{color:#aab4c8;font-family:Arial;line-height:1.7;max-width:700px;margin:0 auto 30px}
+section{padding:75px 6%}.title{text-align:center;margin-bottom:35px}.title h2{font-size:30px;margin:0 0 8px}.title p{color:#77839b;font-family:Arial}
+.stats{max-width:1000px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.stat,.card,.panel{background:var(--card);border:1px solid #26334f;border-radius:14px;padding:24px;box-shadow:0 10px 35px rgba(0,0,0,.25)}.stat{text-align:center}.stat strong{display:block;color:var(--cyan);font-size:30px}.stat small{color:#71809a}
+.grid{max-width:1100px;margin:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}.card h3{margin-top:0}.muted{color:#7d8aa1;font-family:Arial;line-height:1.6}
+.auth-wrap{max-width:520px;margin:30px auto}.tabs{display:flex;gap:8px;margin-bottom:12px}.tabs button{flex:1}.tabs .active{background:var(--cyan);color:#001018}
+input,textarea,select{width:100%;padding:13px 14px;margin:7px 0 14px;background:#080d1a;color:#fff;border:1px solid #2a3856;border-radius:8px;font-family:inherit}input:focus,textarea:focus,select:focus{outline:1px solid var(--cyan)}
+label{font-size:11px;color:#9aa8bf}.required{color:var(--pink)}.hidden{display:none!important}.notice{padding:12px;border-radius:8px;margin:10px 0;font-size:12px}.ok{background:rgba(69,255,145,.1);border:1px solid #286c4b}.err{background:rgba(255,49,88,.1);border:1px solid #793044}
+.record{display:grid;grid-template-columns:1fr auto;gap:15px;align-items:center}.status{font-size:10px;padding:6px 9px;border-radius:20px;background:#27334a;color:#aab4c8}.pending{color:#ffd35c}.approved{color:var(--green)}.rejected{color:var(--pink)}
+progress{width:100%;height:10px;accent-color:var(--cyan)}
+.admin-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.admin-actions button{padding:9px 12px;font-size:10px}
+.file-name{font-size:11px;color:#8d9ab0;margin-top:-7px;margin-bottom:12px}
+footer{text-align:center;padding:35px;color:#58657b;border-top:1px solid #182238;font-size:10px}
+@media(max-width:750px){nav a{display:none}.stats{grid-template-columns:repeat(2,1fr)}section{padding:55px 20px}.record{grid-template-columns:1fr}.hero{min-height:70vh}}
+</style>
+</head>
+<body>
+<div class="gridbg"></div>
+<header>
+  <div class="logo">GD <b>CLUB</b> CZ/SK</div>
+  <nav>
+    <a href="#home">DOMOV</a><a href="#records">REKORDY</a><a href="#submit">PRIDAŤ REKORD</a>
+    <a href="#account">ÚČET</a><a href="#admin" id="adminNav" class="hidden">ADMIN</a>
+  </nav>
+  <button class="dark" id="authBtn" onclick="showAccount()">PRIHLÁSIŤ</button>
+</header>
+
+<main>
+<section class="hero" id="home">
+<div class="box">
+  <div class="badge">🇨🇿 CZECHIA × 🇸🇰 SLOVAKIA • GEOMETRY DASH COMMUNITY</div>
+  <h1>GEOMETRY<br><span>DASH CLUB</span></h1>
+  <p>Oficiálne komunitné miesto pre CZ/SK Geometry Dash hráčov. Pridaj svoje rekordy, pošli video a po schválení adminom sa objavia v tabuľke.</p>
+  <button class="primary" onclick="showAccount()">VSTÚPIŤ DO KLUBU</button>
+  <a class="btn dark" href="#records">POZRIEŤ REKORDY</a>
+</div>
+</section>
+
+<section>
+<div class="stats">
+ <div class="stat"><strong id="memberCount">0</strong><small>REGISTROVANÍ HRÁČI</small></div>
+ <div class="stat"><strong id="recordCount">0</strong><small>SCHVÁLENÉ REKORDY</small></div>
+ <div class="stat"><strong>🇨🇿</strong><small>CZ</small></div>
+ <div class="stat"><strong>🇸🇰</strong><small>SK</small></div>
+</div>
+</section>
+
+<section id="records">
+<div class="title"><h2>🏆 SCHVÁLENÉ REKORDY</h2><p>Rekordy sa zobrazia až po kontrole adminom.</p></div>
+<div id="recordsList" class="grid"></div>
+</section>
+
+<section id="submit">
+<div class="title"><h2>💀 PRIDAŤ NOVÝ REKORD</h2><p>Všetky polia sú povinné. Rekord musí byť doložený videom.</p></div>
+<div class="auth-wrap" id="submitBox"></div>
+</section>
+
+<section id="account">
+<div class="title"><h2>👤 ÚČET</h2><p>Registrácia, prihlásenie a tvoje odoslané rekordy.</p></div>
+<div class="auth-wrap" id="accountBox"></div>
+</section>
+
+<section id="admin" class="hidden">
+<div class="title"><h2>🛡️ ADMIN PANEL</h2><p>Schvaľovanie rekordov a správa komunity.</p></div>
+<div class="auth-wrap" style="max-width:1000px" id="adminBox"></div>
+</section>
+</main>
+
+<footer>Geometry Dash Club CZ/SK • Community project • Not affiliated with RobTop Games</footer>
+
+<script>
+const ADMIN_USER="admin", ADMIN_PASS="Abarth555";
+const LS_USERS="gd_users_v1", LS_RECORDS="gd_records_v1";
+let current=JSON.parse(localStorage.getItem("gd_session")||"null");
+
+const users=()=>JSON.parse(localStorage.getItem(LS_USERS)||"[]");
+const records=()=>JSON.parse(localStorage.getItem(LS_RECORDS)||"[]");
+function saveUsers(x){localStorage.setItem(LS_USERS,JSON.stringify(x))}
+function saveRecords(x){localStorage.setItem(LS_RECORDS,JSON.stringify(x))}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function msg(t,ok=false){return `<div class="notice ${ok?'ok':'err'}">${esc(t)}</div>`}
+function showAccount(){document.querySelector("#account").scrollIntoView({behavior:"smooth"})}
+
+function render(){
+ document.getElementById("memberCount").textContent=users().length;
+ document.getElementById("recordCount").textContent=records().filter(r=>r.status==="approved").length;
+ renderRecords(); renderAccount(); renderSubmit(); renderAdmin();
+ document.getElementById("adminNav").classList.toggle("hidden",!(current?.admin));
+ document.getElementById("authBtn").textContent=current?(current.admin?"ADMIN":"ODHLÁSIŤ"): "PRIHLÁSIŤ";
+}
+function renderRecords(){
+ const list=document.getElementById("recordsList"), rs=records().filter(r=>r.status==="approved");
+ list.innerHTML=rs.length?rs.map(r=>`<div class="card">
+   <div class="record"><div><h3>${esc(r.level)}</h3><div class="muted">🎮 ${esc(r.nick)} • 👤 ${esc(r.name)}</div></div><span class="status approved">SCHVÁLENÉ</span></div>
+   <p>Progress: <b>${esc(r.progress)}%</b></p><progress value="${Number(r.progress)||0}" max="100"></progress>
+   <p class="muted">Video: ${r.videoName?esc(r.videoName):"priložené"}</p>
+ </div>`).join(""):`<div class="card"><h3>Zatiaľ žiadne rekordy</h3><p class="muted">Buď prvý, kto pošle rekord!</p></div>`;
+}
+function renderAccount(){
+ const box=document.getElementById("accountBox");
+ if(!current){box.innerHTML=`<div class="panel"><div class="tabs"><button id="loginTab" class="active" onclick="loginForm()">PRIHLÁSENIE</button><button id="regTab" class="dark" onclick="registerForm()">REGISTRÁCIA</button></div><div id="authForm"></div></div>`;loginForm();return}
+ const mine=records().filter(r=>r.user===current.username);
+ box.innerHTML=`<div class="panel"><h3>👋 ${esc(current.username)}</h3><p class="muted">Tvoj účet je prihlásený.</p><button class="danger" onclick="logout()">ODHLÁSIŤ</button><hr style="border-color:#26334f;margin:20px 0"><h3>Moje rekordy</h3>${mine.length?mine.map(r=>`<p>${esc(r.level)} — ${esc(r.progress)}% — <span class="status ${r.status}">${r.status==="pending"?"ČAKÁ NA SCHVÁLENIE":r.status==="approved"?"SCHVÁLENÉ":"ZAMIETNUTÉ"}</span></p>`).join(""):"<p class='muted'>Ešte si neposlal žiadny rekord.</p>"}</div>`;
+}
+function loginForm(){
+ const f=document.getElementById("authForm");
+ f.innerHTML=`<label>GD / používateľské meno <span class="required">*</span></label><input id="lu" autocomplete="username"><label>Heslo <span class="required">*</span></label><input id="lp" type="password" autocomplete="current-password"><button class="primary" onclick="login()">PRIHLÁSIŤ</button><div id="authMsg"></div>`;
+}
+function registerForm(){
+ document.getElementById("authForm").innerHTML=`<label>Používateľské meno <span class="required">*</span></label><input id="ru"><label>Heslo <span class="required">*</span></label><input id="rp" type="password"><label>Potvrdenie hesla <span class="required">*</span></label><input id="rp2" type="password"><button class="primary" onclick="register()">VYTVORIŤ ÚČET</button><div id="authMsg"></div>`;
+}
+function login(){
+ const u=document.getElementById("lu").value.trim(),p=document.getElementById("lp").value;
+ if(u===ADMIN_USER&&p===ADMIN_PASS){current={username:ADMIN_USER,admin:true};localStorage.setItem("gd_session",JSON.stringify(current));document.getElementById("admin").classList.remove("hidden");render();location.hash="admin";return}
+ const found=users().find(x=>x.username.toLowerCase()===u.toLowerCase()&&x.password===p);
+ if(!found){document.getElementById("authMsg").innerHTML=msg("Nesprávne meno alebo heslo.");return}
+ current={username:found.username,admin:false};localStorage.setItem("gd_session",JSON.stringify(current));render();
+}
+function register(){
+ const u=document.getElementById("ru").value.trim(),p=document.getElementById("rp").value,p2=document.getElementById("rp2").value;
+ if(!u||!p||!p2)return document.getElementById("authMsg").innerHTML=msg("Vyplň všetky povinné polia.");
+ if(p!==p2)return document.getElementById("authMsg").innerHTML=msg("Heslá sa nezhodujú.");
+ if(u.toLowerCase()==="admin")return document.getElementById("authMsg").innerHTML=msg("Toto meno je rezervované.");
+ let us=users();if(us.some(x=>x.username.toLowerCase()===u.toLowerCase()))return document.getElementById("authMsg").innerHTML=msg("Používateľ už existuje.");
+ us.push({username:u,password:p});saveUsers(us);current={username:u,admin:false};localStorage.setItem("gd_session",JSON.stringify(current));render();
+}
+function logout(){current=null;localStorage.removeItem("gd_session");render();location.hash="home"}
+function renderSubmit(){
+ const box=document.getElementById("submitBox");
+ if(!current){box.innerHTML=`<div class="panel"><h3>Najprv sa prihlás</h3><p class="muted">Na odoslanie rekordu potrebuješ účet.</p><button class="primary" onclick="showAccount()">PRIHLÁSIŤ / REGISTROVAŤ</button></div>`;return}
+ if(current.admin){box.innerHTML=`<div class="panel"><h3>Admin účet</h3><p class="muted">Admin účet je určený na schvaľovanie rekordov.</p></div>`;return}
+ box.innerHTML=`<form class="panel" onsubmit="submitRecord(event)">
+ <label>Tvoje meno / prezývka <span class="required">*</span></label><input id="rname" required>
+ <label>Geometry Dash nick <span class="required">*</span></label><input id="rnick" required>
+ <label>Názov levelu <span class="required">*</span></label><input id="rlevel" required>
+ <label>Progress (%) <span class="required">*</span></label><input id="rprogress" type="number" min="0" max="100" required>
+ <label>Video dôkaz <span class="required">*</span></label><input id="rvideo" type="file" accept="video/*" required onchange="document.getElementById('fname').textContent=this.files[0]?this.files[0].name:''">
+ <div id="fname" class="file-name"></div>
+ <button class="primary" type="submit">ODOSLAŤ NA SCHVÁLENIE</button><div id="submitMsg"></div>
+ </form>`;
+}
+function submitRecord(e){
+ e.preventDefault();const file=document.getElementById("rvideo").files[0];
+ if(!file)return;
+ if(file.size>50*1024*1024){document.getElementById("submitMsg").innerHTML=msg("Video je príliš veľké. Demo verzia má limit 50 MB.");return}
+ const r={id:Date.now(),user:current.username,name:document.getElementById("rname").value.trim(),nick:document.getElementById("rnick").value.trim(),level:document.getElementById("rlevel").value.trim(),progress:document.getElementById("rprogress").value,status:"pending",videoName:file.name,videoSize:file.size,created:new Date().toISOString()};
+ let rs=records();rs.push(r);saveRecords(rs);
+ document.getElementById("submitMsg").innerHTML=msg("Rekord bol odoslaný adminovi na schválenie.",true);e.target.reset();render();
+}
+function renderAdmin(){
+ const sec=document.getElementById("admin");
+ if(!current?.admin){sec.classList.add("hidden");return}
+ sec.classList.remove("hidden");
+ const rs=records(), pending=rs.filter(r=>r.status==="pending");
+ document.getElementById("adminBox").innerHTML=`<div class="panel"><h3>🛡️ Čakajúce rekordy (${pending.length})</h3>${pending.length?pending.map(r=>`<div class="card" style="margin-top:12px"><h3>${esc(r.level)}</h3><p class="muted">Meno: ${esc(r.name)}<br>GD nick: ${esc(r.nick)}<br>Progress: ${esc(r.progress)}%<br>Video: ${esc(r.videoName)}</p><div class="admin-actions"><button class="green" onclick="approve(${r.id})">✓ SCHVÁLIŤ</button><button class="danger" onclick="reject(${r.id})">✕ ZAMIETNUŤ</button></div></div>`).join(""):"<p class='muted'>Žiadne rekordy čakajúce na schválenie.</p>"}
+ <hr style="border-color:#26334f;margin:25px 0"><h3>Všetky rekordy</h3>${rs.map(r=>`<p>${esc(r.nick)} — ${esc(r.level)} — ${r.status}</p>`).join("")||"<p class='muted'>Žiadne.</p>"}</div>`;
+}
+function approve(id){let rs=records();let r=rs.find(x=>x.id===id);if(r)r.status="approved";saveRecords(rs);render()}
+function reject(id){let rs=records();let r=rs.find(x=>x.id===id);if(r)r.status="rejected";saveRecords(rs);render()}
+document.getElementById("authBtn").addEventListener("click",()=>{if(current)logout();else showAccount()});
+render();
+</script>
+</body>
+</html>

@@ -1,142 +1,122 @@
 const {
-  sql,
-  bcrypt,
-  json,
-  createToken,
-  setSessionCookie
+    pool,
+    randomToken,
+    setSessionCookie,
+    json
 } = require("./_lib");
 
-module.exports = async (req, res) => {
+module.exports = async function handler(req,res){
 
-  if (req.method !== "POST") {
-    return json(res, 405, {
-      error: "Method not allowed"
-    });
-  }
+    if(req.method !== "POST")
+        return json(res,405,{
+            error:"Method not allowed"
+        });
 
-  try {
+    try{
 
-    const {
-      username,
-      password
-    } = req.body || {};
-
-    const cleanUsername =
-      String(username || "").trim();
-
-    if (
-      cleanUsername.length < 3 ||
-      cleanUsername.length > 32
-    ) {
-      return json(res, 400, {
-        error:
-          "Používateľské meno musí mať 3–32 znakov."
-      });
-    }
-
-    if (
-      !/^[a-zA-Z0-9_.-]+$/.test(
-        cleanUsername
-      )
-    ) {
-      return json(res, 400, {
-        error:
-          "Používateľské meno obsahuje nepovolené znaky."
-      });
-    }
-
-    if (
-      !password ||
-      password.length < 6
-    ) {
-      return json(res, 400, {
-        error:
-          "Heslo musí mať minimálne 6 znakov."
-      });
-    }
-
-    if (
-      cleanUsername.toLowerCase() === "admin"
-    ) {
-      return json(res, 400, {
-        error:
-          "Toto používateľské meno je rezervované."
-      });
-    }
-
-    const existing = await sql`
-      SELECT id
-      FROM users
-      WHERE LOWER(username) =
-            LOWER(${cleanUsername})
-    `;
-
-    if (existing.rowCount > 0) {
-      return json(res, 409, {
-        error:
-          "Používateľ už existuje."
-      });
-    }
-
-    const passwordHash =
-      await bcrypt.hash(
-        password,
-        12
-      );
-
-    const user =
-      await sql`
-        INSERT INTO users
-          (
+        const {
             username,
-            password_hash,
-            is_admin
-          )
-        VALUES
-          (
-            ${cleanUsername},
-            ${passwordHash},
-            FALSE
-          )
-        RETURNING id, username, is_admin
-      `;
+            password
+        } = req.body || {};
 
-    const token =
-      createToken();
+        const user =
+            String(username || "").trim();
 
-    await sql`
-      INSERT INTO sessions
-        (
-          token,
-          user_id,
-          expires_at
-        )
-      VALUES
-        (
-          ${token},
-          ${user.rows[0].id},
-          NOW() + INTERVAL '30 days'
-        )
-    `;
+        const pass =
+            String(password || "");
 
-    setSessionCookie(
-      res,
-      token
-    );
+        if(!user || !pass)
+            return json(res,400,{
+                error:"Vyplň používateľské meno a heslo."
+            });
 
-    return json(res, 200, {
-      ok: true
-    });
+        if(user.length < 3 || user.length > 32)
+            return json(res,400,{
+                error:"Používateľské meno musí mať 3–32 znakov."
+            });
 
-  } catch (error) {
+        if(pass.length < 6)
+            return json(res,400,{
+                error:"Heslo musí mať minimálne 6 znakov."
+            });
 
-    console.error(error);
+        if(user.toLowerCase() === "admin")
+            return json(res,400,{
+                error:"Meno admin je rezervované."
+            });
 
-    return json(res, 500, {
-      error:
-        "Chyba databázy."
-    });
+        const existing =
+            await pool.query(
+                `
+                SELECT id
+                FROM users
+                WHERE LOWER(username)=LOWER($1)
+                LIMIT 1
+                `,
+                [user]
+            );
 
-  }
+        if(existing.rows.length)
+            return json(res,409,{
+                error:"Používateľ už existuje."
+            });
+
+        const inserted =
+            await pool.query(
+                `
+                INSERT INTO users
+                    (username,password_hash,is_admin)
+                VALUES
+                    ($1,crypt($2,gen_salt('bf',12)),FALSE)
+                RETURNING id,username,is_admin
+                `,
+                [user,pass]
+            );
+
+        const dbUser =
+            inserted.rows[0];
+
+        const token =
+            randomToken();
+
+        await pool.query(
+            `
+            INSERT INTO sessions
+                (token,user_id,expires_at)
+            VALUES
+                (
+                    $1,
+                    $2,
+                    NOW() + INTERVAL '30 days'
+                )
+            `,
+            [
+                token,
+                dbUser.id
+            ]
+        );
+
+        setSessionCookie(
+            res,
+            token
+        );
+
+        return json(res,201,{
+            user:{
+                id:dbUser.id,
+                username:dbUser.username,
+                admin:dbUser.is_admin
+            }
+        });
+
+    }catch(error){
+
+        console.error(error);
+
+        return json(res,500,{
+            error:"Server error pri registrácii."
+        });
+
+    }
 
 };

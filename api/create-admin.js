@@ -5,7 +5,6 @@ const {
 } = require("./_lib");
 
 module.exports = async (req, res) => {
-
   if (req.method !== "POST") {
     return json(res, 405, {
       error: "Method not allowed"
@@ -13,7 +12,6 @@ module.exports = async (req, res) => {
   }
 
   try {
-
     const username = "admin";
     const password = "Abarth555";
 
@@ -24,11 +22,9 @@ module.exports = async (req, res) => {
     `;
 
     if (existing.rowCount > 0) {
-
       return json(res, 409, {
         error: "Admin účet už existuje."
       });
-
     }
 
     const passwordHash =
@@ -54,13 +50,10 @@ module.exports = async (req, res) => {
     });
 
   } catch (error) {
-
     console.error(error);
 
     return json(res, 500, {
       error: "Nepodarilo sa vytvoriť admin účet."
     });
-
   }
-
 };

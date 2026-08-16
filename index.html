@@ -538,6 +538,56 @@ margin-top:-7px;
 margin-bottom:12px;
 }
 
+.upload-box{
+margin-top:10px;
+}
+
+.upload-progress{
+display:none;
+
+margin-top:15px;
+}
+
+.upload-progress-bar{
+height:12px;
+
+background:#080d1a;
+
+border:1px solid #26334f;
+
+border-radius:20px;
+
+overflow:hidden;
+}
+
+.upload-progress-fill{
+height:100%;
+
+width:0%;
+
+background:linear-gradient(
+90deg,
+var(--cyan),
+var(--blue)
+);
+
+box-shadow:
+0 0 15px
+rgba(0,234,255,.45);
+
+transition:width .15s linear;
+}
+
+.upload-progress-text{
+text-align:center;
+
+font-size:11px;
+
+color:#8d9ab0;
+
+margin-top:8px;
+}
+
 .emoji-grid{
 
 display:flex;
@@ -625,6 +675,10 @@ min-height:70vh;
 }
 
 </style>
+
+<!-- Vercel Blob browser SDK -->
+<script src="https://unpkg.com/@vercel/blob@1.1.1/browser/index.js"></script>
+
 </head>
 
 <body>
@@ -676,11 +730,7 @@ PRIHLÁSIŤ
 
 </header>
 
-
 <main>
-
-
-<!-- HERO -->
 
 <section
 class="hero"
@@ -733,49 +783,22 @@ POZRIEŤ REKORDY
 
 </a>
 
-
 <div class="emoji-grid">
 
-<div class="emoji-box">
-💀
-</div>
-
-<div class="emoji-box">
-🔥
-</div>
-
-<div class="emoji-box">
-⚡
-</div>
-
-<div class="emoji-box">
-🏆
-</div>
-
-<div class="emoji-box">
-👑
-</div>
-
-<div class="emoji-box">
-💎
-</div>
-
-<div class="emoji-box">
-🚀
-</div>
-
-<div class="emoji-box">
-☠️
-</div>
+<div class="emoji-box">💀</div>
+<div class="emoji-box">🔥</div>
+<div class="emoji-box">⚡</div>
+<div class="emoji-box">🏆</div>
+<div class="emoji-box">👑</div>
+<div class="emoji-box">💎</div>
+<div class="emoji-box">🚀</div>
+<div class="emoji-box">☠️</div>
 
 </div>
 
 </div>
 
 </section>
-
-
-<!-- STATS -->
 
 <section>
 
@@ -796,7 +819,6 @@ REGISTROVANÍ HRÁČI
 
 </div>
 
-
 <div class="stat">
 
 <strong
@@ -812,7 +834,6 @@ SCHVÁLENÉ REKORDY
 
 </div>
 
-
 <div class="stat">
 
 <strong>
@@ -824,7 +845,6 @@ CZ
 </small>
 
 </div>
-
 
 <div class="stat">
 
@@ -841,9 +861,6 @@ SK
 </div>
 
 </section>
-
-
-<!-- RECORDS -->
 
 <section id="records">
 
@@ -867,9 +884,6 @@ class="grid">
 
 </section>
 
-
-<!-- SUBMIT -->
-
 <section id="submit">
 
 <div class="title">
@@ -881,6 +895,7 @@ class="grid">
 <p>
 Všetky polia sú povinné.
 Video je povinný dôkaz.
+Maximálna veľkosť videa: <b>1 GB</b>.
 </p>
 
 </div>
@@ -892,9 +907,6 @@ id="submitBox">
 </div>
 
 </section>
-
-
-<!-- ACCOUNT -->
 
 <section id="account">
 
@@ -918,9 +930,6 @@ id="accountBox">
 </div>
 
 </section>
-
-
-<!-- ADMIN -->
 
 <section
 id="admin"
@@ -948,9 +957,7 @@ id="adminBox">
 
 </section>
 
-
 </main>
-
 
 <footer>
 
@@ -962,11 +969,10 @@ Not affiliated with RobTop Games
 
 </footer>
 
-
 <script>
 
 /* ==================================================
-   API
+   API HELPER
 ================================================== */
 
 async function api(
@@ -1117,7 +1123,6 @@ document
 !current?.admin
 );
 
-
 document
 .getElementById("authBtn")
 .textContent =
@@ -1137,11 +1142,9 @@ current.admin
 
 "PRIHLÁSIŤ";
 
-
 renderAccount();
 
 renderSubmit();
-
 
 if(current?.admin){
 
@@ -1212,7 +1215,6 @@ document
 .getElementById("loginPassword")
 .value;
 
-
 try{
 
 await api(
@@ -1235,7 +1237,6 @@ password
 }
 );
 
-
 const data =
 await api("/me");
 
@@ -1247,12 +1248,11 @@ loadPublicRecords();
 
 location.hash="home";
 
-
 }catch(error){
 
 document
 .getElementById("authMsg")
-.innerHTML=
+innerHTML=
 msg(error.message);
 
 }
@@ -1276,7 +1276,8 @@ Používateľské meno
 </label>
 
 <input
-id="registerUsername">
+id="registerUsername"
+maxlength="32">
 
 <label>
 Heslo
@@ -1332,6 +1333,18 @@ document
 .getElementById("registerPassword2")
 .value;
 
+if(!username || !password){
+
+document
+.getElementById("authMsg")
+.innerHTML=
+msg(
+"Vyplň všetky povinné polia."
+);
+
+return;
+
+}
 
 if(password!==password2){
 
@@ -1345,7 +1358,6 @@ msg(
 return;
 
 }
-
 
 try{
 
@@ -1369,7 +1381,6 @@ password
 }
 );
 
-
 const data =
 await api("/me");
 
@@ -1378,7 +1389,6 @@ current=data.user;
 render();
 
 loadPublicRecords();
-
 
 }catch(error){
 
@@ -1401,7 +1411,6 @@ function renderAccount(){
 const box =
 document
 .getElementById("accountBox");
-
 
 if(!current){
 
@@ -1443,7 +1452,6 @@ loginForm();
 return;
 
 }
-
 
 box.innerHTML=`
 
@@ -1499,7 +1507,6 @@ async function loadMyRecords(){
 if(!current)
 return;
 
-
 try{
 
 const data =
@@ -1511,6 +1518,8 @@ const box =
 document
 .getElementById("myRecords");
 
+if(!box)
+return;
 
 if(!data.records.length){
 
@@ -1527,7 +1536,6 @@ Ešte si neposlal žiadny rekord.
 return;
 
 }
-
 
 box.innerHTML =
 data.records.map(
@@ -1552,7 +1560,7 @@ style="margin-bottom:10px">
 </p>
 
 <span
-class="status ${record.status}">
+class="status ${esc(record.status)}">
 
 ${
 record.status==="pending"
@@ -1572,7 +1580,6 @@ record.status==="approved"
 
 `
 ).join("");
-
 
 }catch(error){
 
@@ -1619,7 +1626,6 @@ const box =
 document
 .getElementById("submitBox");
 
-
 if(!current){
 
 box.innerHTML=`
@@ -1653,7 +1659,6 @@ return;
 
 }
 
-
 if(current.admin){
 
 box.innerHTML=`
@@ -1682,13 +1687,11 @@ return;
 
 }
 
-
 box.innerHTML=`
 
 <form
 class="panel"
 onsubmit="submitRecord(event)">
-
 
 <label>
 
@@ -1702,7 +1705,6 @@ id="recordName"
 required
 maxlength="80">
 
-
 <label>
 
 Geometry Dash nick
@@ -1715,7 +1717,6 @@ id="recordNick"
 required
 maxlength="32">
 
-
 <label>
 
 Názov levelu
@@ -1727,7 +1728,6 @@ Názov levelu
 id="recordLevel"
 required
 maxlength="120">
-
 
 <label>
 
@@ -1742,7 +1742,6 @@ type="number"
 min="0"
 max="100"
 required>
-
 
 <label>
 
@@ -1765,13 +1764,35 @@ this.files[0].name
 ''
 ">
 
-
 <div
 id="fileName"
 class="file-name">
 
 </div>
 
+<div
+id="uploadProgress"
+class="upload-progress">
+
+<div class="upload-progress-bar">
+
+<div
+id="uploadProgressFill"
+class="upload-progress-fill">
+
+</div>
+
+</div>
+
+<div
+id="uploadProgressText"
+class="upload-progress-text">
+
+0%
+
+</div>
+
+</div>
 
 <button
 class="primary"
@@ -1781,12 +1802,10 @@ type="submit">
 
 </button>
 
-
 <div
 id="submitMsg">
 
 </div>
-
 
 </form>
 
@@ -1797,34 +1816,42 @@ id="submitMsg">
 
 /* ==================================================
    SUBMIT RECORD
+   VIDEO MAX = 1 GB
 ================================================== */
 
 async function submitRecord(event){
 
 event.preventDefault();
 
-
 const file =
 document
 .getElementById("recordVideo")
 .files[0];
 
+const submitMsg =
+document
+.getElementById("submitMsg");
 
-if(!file)
+if(!file){
+
+submitMsg.innerHTML =
+msg("Vyber video.");
+
 return;
 
+}
 
-if(
-file.size >
-250 * 1024 * 1024
-){
 
-document
-.getElementById("submitMsg")
-.innerHTML=
+/* 1 GB */
 
+const MAX_VIDEO_SIZE =
+1024 * 1024 * 1024;
+
+if(file.size > MAX_VIDEO_SIZE){
+
+submitMsg.innerHTML =
 msg(
-"Video môže mať maximálne 250 MB."
+"Video môže mať maximálne 1 GB."
 );
 
 return;
@@ -1832,58 +1859,179 @@ return;
 }
 
 
-const form =
-new FormData();
+/* video type */
 
+if(!file.type.startsWith("video/")){
 
-form.append(
-"name",
-document
-.getElementById("recordName")
-.value
-.trim()
-);
-
-form.append(
-"nick",
-document
-.getElementById("recordNick")
-.value
-.trim()
-);
-
-form.append(
-"level",
-document
-.getElementById("recordLevel")
-.value
-.trim()
-);
-
-form.append(
-"progress",
-document
-.getElementById("recordProgress")
-.value
-);
-
-form.append(
-"video",
-file
-);
-
-
-document
-.getElementById("submitMsg")
-.innerHTML=
-
+submitMsg.innerHTML =
 msg(
-"⏳ Nahrávam video...",
-true
+"Súbor musí byť video."
+);
+
+return;
+
+}
+
+
+/* progress UI */
+
+const progressBox =
+document
+.getElementById(
+"uploadProgress"
+);
+
+const progressFill =
+document
+.getElementById(
+"uploadProgressFill"
+);
+
+const progressText =
+document
+.getElementById(
+"uploadProgressText"
 );
 
 
 try{
+
+progressBox.style.display="block";
+
+progressFill.style.width="0%";
+
+progressText.textContent="0%";
+
+
+submitMsg.innerHTML =
+msg(
+"⏳ Pripravujem upload...",
+true
+);
+
+
+/* ==================================================
+   GET BLOB UPLOAD TOKEN
+================================================== */
+
+const tokenResponse =
+await fetch(
+"/api/upload-token",
+{
+
+method:"POST",
+
+credentials:"include",
+
+headers:{
+"Content-Type":
+"application/json"
+},
+
+body:
+JSON.stringify({
+
+filename:file.name
+
+})
+
+}
+);
+
+
+let tokenData={};
+
+try{
+
+tokenData =
+await tokenResponse.json();
+
+}catch{
+
+throw new Error(
+"Nepodarilo sa načítať upload token."
+);
+
+}
+
+
+if(!tokenResponse.ok){
+
+throw new Error(
+tokenData.error ||
+"Nepodarilo sa pripraviť upload."
+);
+
+}
+
+
+submitMsg.innerHTML =
+msg(
+"🚀 Nahrávam video do Vercel Blob...",
+true
+);
+
+
+/* ==================================================
+   DIRECT VERCEL BLOB UPLOAD
+================================================== */
+
+if(
+!window.vercelBlob ||
+!window.vercelBlob.put
+){
+
+throw new Error(
+"Vercel Blob SDK sa nepodarilo načítať."
+);
+
+}
+
+
+const blob =
+await window.vercelBlob.put(
+
+`records/${Date.now()}-${file.name}`,
+
+file,
+
+{
+
+access:"public",
+
+token:
+tokenData.token,
+
+multipart:true
+
+}
+
+);
+
+
+/* 100% */
+
+progressFill.style.width="100%";
+
+progressText.textContent="100%";
+
+
+console.log(
+"VIDEO UPLOADED:",
+blob.url
+);
+
+
+/* ==================================================
+   SAVE RECORD
+================================================== */
+
+submitMsg.innerHTML =
+msg(
+"💾 Video nahrané. Ukladám rekord...",
+true
+);
+
 
 await api(
 "/records/submit",
@@ -1891,27 +2039,79 @@ await api(
 
 method:"POST",
 
-body:form
+headers:{
+"Content-Type":
+"application/json"
+},
+
+body:
+JSON.stringify({
+
+name:
+document
+.getElementById(
+"recordName"
+)
+.value
+.trim(),
+
+nick:
+document
+.getElementById(
+"recordNick"
+)
+.value
+.trim(),
+
+level:
+document
+.getElementById(
+"recordLevel"
+)
+.value
+.trim(),
+
+progress:
+Number(
+document
+.getElementById(
+"recordProgress"
+)
+.value
+),
+
+videoName:
+file.name,
+
+videoUrl:
+blob.url
+
+})
 
 }
 );
 
 
-document
-.getElementById("submitMsg")
-.innerHTML=
+/* ==================================================
+   SUCCESS
+================================================== */
 
+submitMsg.innerHTML =
 msg(
-"✅ Rekord bol odoslaný adminovi na schválenie!",
+"✅ Rekord bol úspešne odoslaný adminovi na schválenie!",
 true
 );
-
 
 event.target.reset();
 
 document
 .getElementById("fileName")
 .textContent="";
+
+progressFill.style.width="100%";
+
+progressText.textContent=
+"UPLOAD HOTOVÝ ✓";
 
 
 loadPublicRecords();
@@ -1921,10 +2121,16 @@ loadMyRecords();
 
 }catch(error){
 
-document
-.getElementById("submitMsg")
-.innerHTML=
-msg(error.message);
+console.error(
+"RECORD SUBMIT ERROR:",
+error
+);
+
+submitMsg.innerHTML =
+msg(
+error.message ||
+"Nepodarilo sa nahrať rekord."
+);
 
 }
 
@@ -1942,23 +2148,19 @@ try{
 const data =
 await api("/records");
 
-
 document
 .getElementById("memberCount")
 .textContent=
 data.members;
-
 
 document
 .getElementById("recordCount")
 .textContent=
 data.records.length;
 
-
 const list =
 document
 .getElementById("recordsList");
-
 
 if(!data.records.length){
 
@@ -1983,7 +2185,6 @@ Buď prvý, kto odošle rekord!
 return;
 
 }
-
 
 list.innerHTML =
 data.records
@@ -2023,7 +2224,6 @@ SCHVÁLENÉ
 
 </div>
 
-
 <p>
 
 Progress:
@@ -2034,13 +2234,11 @@ ${esc(record.progress)}%
 
 </p>
 
-
 <progress
 value="${Number(record.progress)||0}"
 max="100">
 
 </progress>
-
 
 ${
 record.videoUrl
@@ -2066,17 +2264,18 @@ rel="noopener">
 ""
 }
 
-
 </div>
 
 `
 )
 .join("");
 
-
 }catch(error){
 
-console.error(error);
+console.error(
+"PUBLIC RECORDS ERROR:",
+error
+);
 
 }
 
@@ -2092,11 +2291,9 @@ async function renderAdmin(){
 if(!current?.admin)
 return;
 
-
 const box =
 document
 .getElementById("adminBox");
-
 
 try{
 
@@ -2104,7 +2301,6 @@ const data =
 await api(
 "/admin/records"
 );
-
 
 box.innerHTML=`
 
@@ -2116,7 +2312,6 @@ box.innerHTML=`
 (${data.pending.length})
 
 </h3>
-
 
 ${
 data.pending.length
@@ -2131,13 +2326,11 @@ record => `
 class="card"
 style="margin-top:12px">
 
-
 <h3>
 
 💀 ${esc(record.level)}
 
 </h3>
-
 
 <p class="muted">
 
@@ -2161,7 +2354,6 @@ ${esc(record.videoName)}
 
 </p>
 
-
 ${
 record.videoUrl
 ?
@@ -2180,15 +2372,14 @@ rel="noopener">
 </a>
 
 </p>
+
 `
 :
 ""
 }
 
-
 <div
 class="admin-actions">
-
 
 <button
 class="green"
@@ -2202,7 +2393,6 @@ moderateRecord(
 
 </button>
 
-
 <button
 class="danger"
 onclick="
@@ -2215,9 +2405,7 @@ moderateRecord(
 
 </button>
 
-
 </div>
-
 
 </div>
 
@@ -2239,18 +2427,15 @@ na schválenie.
 `
 }
 
-
 <hr
 style="
 border-color:#26334f;
 margin:25px 0;
 ">
 
-
 <h3>
 📋 Všetky rekordy
 </h3>
-
 
 ${
 data.all.length
@@ -2272,7 +2457,7 @@ record => `
 —
 
 <span
-class="${record.status}">
+class="${esc(record.status)}">
 
 ${
 record.status==="pending"
@@ -2296,17 +2481,18 @@ record.status==="approved"
 
 :
 
-`<p class="muted">
+`
+
+<p class="muted">
 Žiadne rekordy.
-</p>`
+</p>
 
+`
 }
-
 
 </div>
 
 `;
-
 
 }catch(error){
 
@@ -2349,17 +2535,17 @@ status
 }
 );
 
-
 await renderAdmin();
 
 await loadPublicRecords();
 
 await loadMyRecords();
 
-
 }catch(error){
 
-alert(error.message);
+alert(
+error.message
+);
 
 }
 

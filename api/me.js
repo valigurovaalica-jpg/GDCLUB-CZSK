@@ -1,42 +1,37 @@
 const {
-  getSession,
-  json
+    getUser,
+    json
 } = require("./_lib");
 
-module.exports = async (req, res) => {
+module.exports = async function handler(req,res){
 
-  try {
+    if(req.method !== "GET")
+        return json(res,405,{
+            error:"Method not allowed"
+        });
 
-    const user =
-      await getSession(req);
+    try{
 
-    if (!user) {
+        const user =
+            await getUser(req);
 
-      return json(res, 200, {
-        user: null
-      });
+        if(!user)
+            return json(res,401,{
+                error:"Not logged in"
+            });
+
+        return json(res,200,{
+            user
+        });
+
+    }catch(error){
+
+        console.error(error);
+
+        return json(res,500,{
+            error:"Server error."
+        });
 
     }
-
-    return json(res, 200, {
-      user: {
-        id: user.id,
-        username: user.username,
-        admin: Boolean(
-          user.is_admin
-        )
-      }
-    });
-
-  } catch (error) {
-
-    console.error(error);
-
-    return json(res, 500, {
-      error:
-        "Chyba servera."
-    });
-
-  }
 
 };

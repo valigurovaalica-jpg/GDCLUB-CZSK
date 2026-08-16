@@ -1,7 +1,8 @@
 const {
     pool,
+    getUser,
     json
-} = require("./_lib");
+} = require("../_lib");
 
 module.exports = async function handler(req,res){
 
@@ -12,16 +13,15 @@ module.exports = async function handler(req,res){
 
     try{
 
-        const members =
-            await pool.query(
-                `
-                SELECT COUNT(*)::int AS count
-                FROM users
-                WHERE is_admin=FALSE
-                `
-            );
+        const user =
+            await getUser(req);
 
-        const records =
+        if(!user || !user.admin)
+            return json(res,403,{
+                error:"Nemáš oprávnenie."
+            });
+
+        const result =
             await pool.query(
                 `
                 SELECT
@@ -30,32 +30,40 @@ module.exports = async function handler(req,res){
                     r.nick,
                     r.level,
                     r.progress,
+                    r.status,
                     r.video_name,
                     r.video_url,
-                    r.created_at
+                    r.created_at,
+                    u.username
                 FROM records r
-                WHERE r.status='approved'
-                ORDER BY r.progress DESC,
-                         r.created_at DESC
+                JOIN users u
+                    ON u.id=r.user_id
+                ORDER BY r.created_at DESC
                 `
             );
 
+        const mapped =
+            result.rows.map(r => ({
+                id:r.id,
+                name:r.name,
+                nick:r.nick,
+                level:r.level,
+                progress:r.progress,
+                status:r.status,
+                videoName:r.video_name,
+                videoUrl:r.video_url,
+                createdAt:r.created_at,
+                username:r.username
+            }));
+
         return json(res,200,{
 
-            members:
-                members.rows[0].count,
+            pending:
+                mapped.filter(
+                    r => r.status === "pending"
+                ),
 
-            records:
-                records.rows.map(r => ({
-                    id:r.id,
-                    name:r.name,
-                    nick:r.nick,
-                    level:r.level,
-                    progress:r.progress,
-                    videoName:r.video_name,
-                    videoUrl:r.video_url,
-                    createdAt:r.created_at
-                }))
+            all:mapped
 
         });
 

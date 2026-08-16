@@ -1,50 +1,50 @@
 const {
-  sql,
-  getCookie,
-  clearSessionCookie,
-  json
+    pool,
+    getSessionToken,
+    clearSessionCookie,
+    json
 } = require("./_lib");
 
-module.exports = async (req, res) => {
+module.exports = async function handler(req,res){
 
-  if (req.method !== "POST") {
-    return json(res, 405, {
-      error: "Method not allowed"
-    });
-  }
+    if(req.method !== "POST")
+        return json(res,405,{
+            error:"Method not allowed"
+        });
 
-  try {
+    try{
 
-    const token =
-      getCookie(
-        req,
-        "gd_session"
-      );
+        const token =
+            getSessionToken(req);
 
-    if (token) {
+        if(token){
 
-      await sql`
-        DELETE FROM sessions
-        WHERE token = ${token}
-      `;
+            await pool.query(
+                `
+                DELETE FROM sessions
+                WHERE token=$1
+                `,
+                [token]
+            );
+
+        }
+
+        clearSessionCookie(res);
+
+        return json(res,200,{
+            success:true
+        });
+
+    }catch(error){
+
+        console.error(error);
+
+        clearSessionCookie(res);
+
+        return json(res,200,{
+            success:true
+        });
 
     }
-
-    clearSessionCookie(res);
-
-    return json(res, 200, {
-      ok: true
-    });
-
-  } catch (error) {
-
-    console.error(error);
-
-    return json(res, 500, {
-      error:
-        "Chyba servera."
-    });
-
-  }
 
 };

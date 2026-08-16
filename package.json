@@ -1,0 +1,10 @@
+{
+  "name": "gd-club",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Geometry Dash Club CZ/SK",
+  "dependencies": {
+    "@vercel/postgres": "^0.10.0",
+    "bcryptjs": "^3.0.2"
+  }
+}

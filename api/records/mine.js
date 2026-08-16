@@ -1,55 +1,73 @@
 const {
-  sql,
-  getSession,
-  json
+    pool,
+    getUser,
+    json
 } = require("../_lib");
 
-module.exports = async (req, res) => {
+module.exports = async function handler(req,res){
 
-  try {
+    if(req.method !== "GET")
+        return json(res,405,{
+            error:"Method not allowed"
+        });
 
-    const user =
-      await getSession(req);
+    try{
 
-    if (!user) {
+        const user =
+            await getUser(req);
 
-      return json(res, 401, {
-        error:
-          "Nie si prihlásený."
-      });
+        if(!user)
+            return json(res,401,{
+                error:"Musíš byť prihlásený."
+            });
+
+        const result =
+            await pool.query(
+                `
+                SELECT
+                    id,
+                    name,
+                    nick,
+                    level,
+                    progress,
+                    status,
+                    video_name,
+                    video_url,
+                    created_at,
+                    reviewed_at
+                FROM records
+                WHERE user_id=$1
+                ORDER BY created_at DESC
+                `,
+                [user.id]
+            );
+
+        return json(res,200,{
+
+            records:
+                result.rows.map(r => ({
+                    id:r.id,
+                    name:r.name,
+                    nick:r.nick,
+                    level:r.level,
+                    progress:r.progress,
+                    status:r.status,
+                    videoName:r.video_name,
+                    videoUrl:r.video_url,
+                    createdAt:r.created_at,
+                    reviewedAt:r.reviewed_at
+                }))
+
+        });
+
+    }catch(error){
+
+        console.error(error);
+
+        return json(res,500,{
+            error:"Server error."
+        });
 
     }
-
-    const records =
-      await sql`
-        SELECT
-          id,
-          name,
-          nick,
-          level,
-          progress,
-          status,
-          video_name AS "videoName",
-          video_url AS "videoUrl",
-          created_at
-        FROM records
-        WHERE user_id = ${user.id}
-        ORDER BY created_at DESC
-      `;
-
-    return json(res, 200, {
-      records: records.rows
-    });
-
-  } catch (error) {
-
-    console.error(error);
-
-    return json(res, 500, {
-      error:
-        "Chyba databázy."
-    });
-
-  }
 
 };

@@ -1,77 +1,72 @@
 const {
-  sql,
-  getSession,
-  json
-} = require("../_lib");
+    pool,
+    json
+} = require("./_lib");
 
-module.exports = async (req, res) => {
+module.exports = async function handler(req,res){
 
-  if (req.method !== "GET") {
-    return json(res, 405, {
-      error: "Method not allowed"
-    });
-  }
+    if(req.method !== "GET")
+        return json(res,405,{
+            error:"Method not allowed"
+        });
 
-  try {
+    try{
 
-    const user = await getSession(req);
+        const members =
+            await pool.query(
+                `
+                SELECT COUNT(*)::int AS count
+                FROM users
+                WHERE is_admin=FALSE
+                `
+            );
 
-    if (!user) {
-      return json(res, 401, {
-        error: "Nie si prihlásený."
-      });
+        const records =
+            await pool.query(
+                `
+                SELECT
+                    r.id,
+                    r.name,
+                    r.nick,
+                    r.level,
+                    r.progress,
+                    r.video_name,
+                    r.video_url,
+                    r.created_at
+                FROM records r
+                WHERE r.status='approved'
+                ORDER BY r.progress DESC,
+                         r.created_at DESC
+                `
+            );
+
+        return json(res,200,{
+
+            members:
+                members.rows[0].count,
+
+            records:
+                records.rows.map(r => ({
+                    id:r.id,
+                    name:r.name,
+                    nick:r.nick,
+                    level:r.level,
+                    progress:r.progress,
+                    videoName:r.video_name,
+                    videoUrl:r.video_url,
+                    createdAt:r.created_at
+                }))
+
+        });
+
+    }catch(error){
+
+        console.error(error);
+
+        return json(res,500,{
+            error:"Server error."
+        });
+
     }
-
-    if (!user.is_admin) {
-      return json(res, 403, {
-        error: "Nemáš oprávnenie."
-      });
-    }
-
-    const pending = await sql`
-      SELECT
-        id,
-        name,
-        nick,
-        level,
-        progress,
-        status,
-        video_name AS "videoName",
-        video_url AS "videoUrl",
-        created_at
-      FROM records
-      WHERE status = 'pending'
-      ORDER BY created_at ASC
-    `;
-
-    const all = await sql`
-      SELECT
-        id,
-        name,
-        nick,
-        level,
-        progress,
-        status,
-        video_name AS "videoName",
-        video_url AS "videoUrl",
-        created_at
-      FROM records
-      ORDER BY created_at DESC
-    `;
-
-    return json(res, 200, {
-      pending: pending.rows,
-      all: all.rows
-    });
-
-  } catch (error) {
-
-    console.error(error);
-
-    return json(res, 500, {
-      error: "Chyba databázy."
-    });
-
-  }
 
 };
